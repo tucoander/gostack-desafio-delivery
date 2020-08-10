@@ -18,11 +18,19 @@ import {
   FoodPricing,
 } from './styles';
 
+interface Extra {
+  id: number;
+  name: string;
+  value: number;
+  quantity: number;
+}
+
 interface Food {
   id: number;
   name: string;
   description: string;
   price: number;
+  category: number;
   thumbnail_url: string;
   formattedPrice: string;
 }
@@ -33,10 +41,25 @@ const Favorites: React.FC = () => {
   useEffect(() => {
     async function loadFavorites(): Promise<void> {
       // Load favorite foods from api
+      const response = await api.get<Food[]>('/favorites');
+
+      const listFavoritesFoods = response.data.map<Food>(food => {
+        return {
+          id: food.id,
+          name: food.name,
+          description: food.description,
+          price: food.price,
+          category: food.category,
+          thumbnail_url: food.thumbnail_url,
+          formattedPrice: formatValue(food.price),
+        };
+      });
+
+      setFavorites(listFavoritesFoods);
     }
 
     loadFavorites();
-  }, []);
+  }, [favorites, setFavorites]);
 
   return (
     <Container>
