@@ -55,26 +55,72 @@ const Dashboard: React.FC = () => {
 
   async function handleNavigate(id: number): Promise<void> {
     // Navigate do ProductDetails page
+    navigation.navigate('FoodDetails', { id });
   }
 
   useEffect(() => {
     async function loadFoods(): Promise<void> {
       // Load Foods from API
-    }
+      const response = await api.get<Food[]>('/foods', {
+        params: {
+          name_like: searchValue,
+        },
+      });
 
+      const listFoods = response.data.map<Food>(food => {
+        return {
+          id: food.id,
+          name: food.name,
+          description: food.description,
+          price: food.price,
+          thumbnail_url: food.thumbnail_url,
+          formattedPrice: formatValue(food.price),
+        };
+      });
+
+      setFoods(listFoods);
+    }
     loadFoods();
   }, [selectedCategory, searchValue]);
 
   useEffect(() => {
     async function loadCategories(): Promise<void> {
       // Load categories from API
+      const response = await api.get<Category[]>('/categories');
+
+      const listCategories = response.data.map<Category>(category => {
+        return {
+          id: category.id,
+          title: category.title,
+          image_url: category.image_url,
+        };
+      });
+      setCategories(listCategories);
     }
 
     loadCategories();
   }, []);
 
-  function handleSelectCategory(id: number): void {
+  async function handleSelectCategory(id: number): Promise<void> {
     // Select / deselect category
+    const response = await api.get<Food[]>('/foods', {
+      params: {
+        category_like: id,
+      },
+    });
+
+    const listFoodsFiltered = response.data.map<Food>(food => {
+      return {
+        id: food.id,
+        name: food.name,
+        description: food.description,
+        price: food.price,
+        thumbnail_url: food.thumbnail_url,
+        formattedPrice: formatValue(food.price),
+      };
+    });
+
+    setFoods(listFoodsFiltered);
   }
 
   return (
